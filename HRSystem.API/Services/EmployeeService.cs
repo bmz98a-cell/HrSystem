@@ -20,34 +20,29 @@ namespace HRSystem.API.Services
         }
 
         public async Task<List<EmployeeResponseDto>> GetAllAsync(
-    int? branchId,
+    int branchId,
     int page,
     int pageSize,
     string? search)
-
         {
-
-            var tenantIdFromToken = _tenantProvider.GetTenantId();
             var tenantId = _tenantProvider.GetTenantId();
 
             var query = _context.Employees
-                .Include(e => e.Branch)
                 .Where(e => e.TenantId == tenantId);
 
-            if (branchId.HasValue)
-                query = query.Where(e => e.BranchId == branchId.Value);
+            if (branchId > 0)
+                query = query.Where(e => e.BranchId == branchId);
 
-            // 🔥 إضافة البحث
             if (!string.IsNullOrEmpty(search))
-                query = query.Where(e => e.Name.ToLower().Contains(search.ToLower()));
+                query = query.Where(e => e.Name.Contains(search));
 
             var result = await query
+                .Include(e => e.Branch)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .Select(e => new EmployeeResponseDto
                 {
                     Id = e.Id,
-                    
                     Name = e.Name,
                     Email = e.Email,
                     Phone = e.Phone,
@@ -60,32 +55,34 @@ namespace HRSystem.API.Services
             return result;
         }
 
-        public async Task<EmployeeResponseDto?> GetByIdAsync(int id, int tenantId)
+        public async Task<EmployeeResponseDto?> GetByIdAsync(int id)
         {
+            var tenantId = _tenantProvider.GetTenantId();
+
             return await _context.Employees
-                .Include(e => e.Branch)
                 .Where(e => e.Id == id && e.TenantId == tenantId)
                 .Select(e => new EmployeeResponseDto
                 {
                     Id = e.Id,
-                    
                     Name = e.Name,
                     Email = e.Email,
                     Phone = e.Phone,
                     Salary = e.Salary,
                     BranchId = e.BranchId,
-                    BranchName = e.Branch != null ? e.Branch.Name : ""
+                    BranchName = e.Branch.Name
                 })
                 .FirstOrDefaultAsync();
         }
 
-        public async Task<EmployeeResponseDto> CreateAsync(CreateEmployeeDto dto, int tenantId)
+        public async Task<EmployeeResponseDto> CreateAsync(CreateEmployeeDto dto)
         {
+            var tenantId = _tenantProvider.GetTenantId();
+
             var branch = await _context.Branches
                 .FirstOrDefaultAsync(b => b.Id == dto.BranchId && b.TenantId == tenantId);
 
             if (branch == null)
-                throw new Exception("Branch not found or not belongs to this tenant");
+                throw new Exception("Branch not found");
 
             var employee = new Employee
             {
@@ -103,29 +100,24 @@ namespace HRSystem.API.Services
             return new EmployeeResponseDto
             {
                 Id = employee.Id,
-                
                 Name = employee.Name,
                 Email = employee.Email,
                 Phone = employee.Phone,
                 Salary = employee.Salary,
                 BranchId = employee.BranchId,
-                BranchName = branch.Name // 🔥 الحل هنا
+                BranchName = branch.Name
             };
         }
 
-        public async Task<bool> UpdateAsync(int id, int tenantId, UpdateEmployeeDto dto)
+        public async Task<bool> UpdateAsync(int id, UpdateEmployeeDto dto)
         {
+            var tenantId = _tenantProvider.GetTenantId();
+
             var employee = await _context.Employees
                 .FirstOrDefaultAsync(e => e.Id == id && e.TenantId == tenantId);
 
             if (employee == null)
                 return false;
-
-            var branch = await _context.Branches
-                .FirstOrDefaultAsync(b => b.Id == dto.BranchId && b.TenantId == tenantId);
-
-            if (branch == null)
-                throw new Exception("Invalid Branch");
 
             employee.Name = dto.Name;
             employee.Email = dto.Email;
@@ -134,12 +126,13 @@ namespace HRSystem.API.Services
             employee.BranchId = dto.BranchId;
 
             await _context.SaveChangesAsync();
-
             return true;
         }
 
-        public async Task<bool> DeleteAsync(int id, int tenantId)
+        public async Task<bool> DeleteAsync(int id)
         {
+            var tenantId = _tenantProvider.GetTenantId();
+
             var employee = await _context.Employees
                 .FirstOrDefaultAsync(e => e.Id == id && e.TenantId == tenantId);
 
@@ -151,6 +144,7 @@ namespace HRSystem.API.Services
 
             return true;
         }
+
     }
 
 }

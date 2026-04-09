@@ -1,39 +1,36 @@
-﻿using HRSystem.API.Data;
-using HRSystem.API.DTOs;
+﻿using HRSystem.API.DTOs;
 using HRSystem.API.Services;
-using Humanizer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HRSystem.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class BranchesController : BaseController
+    [Authorize]
+    public class BranchesController : ControllerBase
     {
         private readonly IBranchService _service;
+        private readonly ITenantProvider _tenantProvider;
 
-        public BranchesController(IBranchService service)
+        public BranchesController(IBranchService service, ITenantProvider tenantProvider)
         {
             _service = service;
+            _tenantProvider = tenantProvider;
         }
 
-        // ✅ GET ALL
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            int tenantId = TenantId;
-
+            var tenantId = _tenantProvider.GetTenantId();
             var result = await _service.GetAllAsync(tenantId);
-
             return Ok(result);
         }
 
-        // ✅ GET BY ID
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            int tenantId = TenantId;
-
+            var tenantId = _tenantProvider.GetTenantId();
             var result = await _service.GetByIdAsync(id, tenantId);
 
             if (result == null)
@@ -42,40 +39,33 @@ namespace HRSystem.API.Controllers
             return Ok(result);
         }
 
-        // ✅ POST
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateBranchDto dto)
         {
-            int tenantId = TenantId;
-
+            var tenantId = _tenantProvider.GetTenantId();
             var result = await _service.CreateAsync(dto, tenantId);
-
             return Ok(result);
         }
 
-        // ✅ PUT
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateBranchDto dto)
         {
-            int tenantId = TenantId;
+            var tenantId = _tenantProvider.GetTenantId();
+            var success = await _service.UpdateAsync(id, tenantId, dto);
 
-            var result = await _service.UpdateAsync(id, tenantId, dto);
-
-            if (!result)
+            if (!success)
                 return NotFound();
 
             return Ok();
         }
 
-        // ✅ DELETE
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            int tenantId = TenantId;
+            var tenantId = _tenantProvider.GetTenantId();
+            var success = await _service.DeleteAsync(id, tenantId);
 
-            var result = await _service.DeleteAsync(id, tenantId);
-
-            if (!result)
+            if (!success)
                 return NotFound();
 
             return Ok();
