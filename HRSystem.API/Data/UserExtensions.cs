@@ -1,5 +1,5 @@
 ﻿using System.Security.Claims;
-
+// test note --------
 namespace HRSystem.API.Data
 {
     public static class UserExtensions
