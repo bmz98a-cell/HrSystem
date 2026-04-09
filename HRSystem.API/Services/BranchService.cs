@@ -22,6 +22,7 @@ namespace HRSystem.API.Services
                 .Where(b => b.TenantId == tenantId)
                 .Select(b => new BranchDto
                 {
+                    Id = b.Id,
                     Name = b.Name,
                     Address = b.Address
                 })
@@ -35,6 +36,7 @@ namespace HRSystem.API.Services
                 .Where(b => b.Id == id && b.TenantId == tenantId)
                 .Select(b => new BranchDto
                 {
+                    Id = b.Id,
                     Name = b.Name,
                     Address = b.Address
                 })

@@ -6,17 +6,16 @@ namespace HRSystem.API.Data
 {
     public class ApplicationDbContext : DbContext
     {
-        private readonly TenantProvider _tenantProvider;
+        private readonly ITenantProvider _tenantProvider;
 
         public ApplicationDbContext(
             DbContextOptions<ApplicationDbContext> options,
-            TenantProvider tenantProvider)
+            ITenantProvider tenantProvider)
             : base(options)
         {
             _tenantProvider = tenantProvider;
         }
-        
-        
+
         public DbSet<Tenant> Tenants { get; set; }
         public DbSet<Branch> Branches { get; set; }
         public DbSet<Employee> Employees { get; set; }
@@ -28,7 +27,7 @@ namespace HRSystem.API.Data
         public DbSet<RolePermission> RolePermissions { get; set; }
         public DbSet<UserPermission> UserPermissions { get; set; }
         public DbSet<License> Licenses { get; set; }
-        
+
 
 
 

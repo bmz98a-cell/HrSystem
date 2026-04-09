@@ -1,11 +1,16 @@
 ﻿using HRSystem.API.Data;
 using HRSystem.API.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HRSystem.API.Controllers
 {
+   
+
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
+   
     public class TenantsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;

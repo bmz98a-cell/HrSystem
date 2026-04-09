@@ -1,5 +1,4 @@
 ﻿using HRSystem.API.Services;
-using System.Security.Claims;
 
 public class TenantProvider : ITenantProvider
 {
