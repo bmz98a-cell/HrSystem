@@ -4,9 +4,9 @@ public class Permission
 {
     public int Id { get; set; }
 
-    public string Name { get; set; } = default!;
+    public string Name { get; set; } = null!; // Example: CreateEmployee
 
-    public ICollection<RolePermission> RolePermissions { get; set; } = new List<RolePermission>();
+    public string Description { get; set; } = null!;
 
-    public ICollection<UserPermission> UserPermissions { get; set; } = new List<UserPermission>();
+    public int TenantId { get; set; }
 }

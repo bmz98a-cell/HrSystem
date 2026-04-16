@@ -54,6 +54,20 @@ namespace HRSystem.API.Data
     .OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<Branch>()
     .HasQueryFilter(b => b.TenantId == GetCurrentTenantId());
+
+            modelBuilder.Entity<RolePermission>()
+    .HasKey(rp => new { rp.RoleId, rp.PermissionId });
+
+            modelBuilder.Entity<UserPermission>()
+                .HasKey(up => new { up.UserId, up.PermissionId });
+
+            modelBuilder.Entity<UserRole>()
+                .HasKey(ur => new { ur.UserId, ur.RoleId });
+            modelBuilder.Entity<Role>()
+    .HasQueryFilter(r => r.TenantId == _tenantProvider.GetTenantId());
+
+            modelBuilder.Entity<Permission>()
+                .HasQueryFilter(p => p.TenantId == _tenantProvider.GetTenantId());
         }
 
         // 🔒 دالة آمنة بدل GetTenantId مباشرة
